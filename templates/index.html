@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Todo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Todo</h1>
+
+      <section class="stats">
+        <div class="stat">Users: <strong>{{ counts.users }}</strong></div>
+        <div class="stat">Total: <strong>{{ counts.total }}</strong></div>
+        <div class="stat">Open: <strong>{{ counts.open }}</strong></div>
+        <div class="stat">Done: <strong>{{ counts.done }}</strong></div>
+      </section>
+
+      <!-- Add User -->
+      <form class="row" action="{{ url_for('users_add') }}" method="post">
+        <input type="text" name="name" placeholder="New user name" required />
+        <button type="submit">Add User</button>
+      </form>
+
+      <!-- Add Todo -->
+      <form class="row" action="{{ url_for('todos_add') }}" method="post">
+        <input type="text" name="title" placeholder="New todo" required />
+        <input type="date" name="due_date" />
+        <select name="user_id" required>
+          <option value="">Assign to user…</option>
+          {% for u in users %}
+          <option value="{{ u['id'] }}">{{ u['name'] }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit">Add Todo</button>
+      </form>
+
+      <ul class="todos">
+        {% for t in todos %}
+        <li class="todo {{ 'done' if t['is_done'] else '' }}">
+          <div class="content">
+            <form class="edit" action="{{ url_for('todos_edit', todo_id=t['id']) }}" method="post">
+              <input type="text" name="title" value="{{ t['title'] }}" />
+              <input type="date" name="due_date" value="{{ t['due_date'] or '' }}" />
+              <label><input type="checkbox" name="is_done" {% if t['is_done'] %}checked{% endif %}> Done</label>
+              <button type="submit">Save</button>
+            </form>
+            <div class="meta">Owner: {{ t['user_name'] }} • Due: {{ t['due_date'] or '—' }}</div>
+          </div>
+          <form action="{{ url_for('todos_delete', todo_id=t['id']) }}" method="post">
+            <button class="danger" title="Delete Todo">✕</button>
+          </form>
+        </li>
+        {% else %}
+        <li class="empty">No todos yet — add your first one above.</li>
+        {% endfor %}
+      </ul>
+
+      <h2>Users</h2>
+      <ul class="users">
+        {% for u in users %}
+        <li>
+          {{ u['name'] }}
+          <form action="{{ url_for('users_delete', user_id=u['id']) }}" method="post" style="display:inline;">
+            <button class="danger" title="Delete User">Delete</button>
+          </form>
+        </li>
+        {% else %}
+        <li class="empty">No users yet — create one above.</li>
+        {% endfor %}
+      </ul>
+
+    </main>
+  </body>
+</html>
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Todo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Todo</h1>
+
+      <section class="stats">
+        <div class="stat">Total: <strong>{{ counts.total }}</strong></div>
+        <div class="stat">Open: <strong>{{ counts.open }}</strong></div>
+        <div class="stat">Done: <strong>{{ counts.done }}</strong></div>
+      </section>
+
+      <form class="add-form" action="{{ url_for('add') }}" method="post">
+        <input type="text" name="title" placeholder="What needs doing?" required />
+        <input type="date" name="due_date" />
+        <button type="submit">Add</button>
+      </form>
+
+      <ul class="todos">
+        {% for t in todos %}
+        <li class="todo {{ 'done' if t['is_done'] else '' }}">
+          <form action="{{ url_for('toggle', todo_id=t['id']) }}" method="post">
+            <button title="Toggle">{{ '☑' if t['is_done'] else '☐' }}</button>
+          </form>
+          <div class="content">
+            <div class="title">{{ t['title'] }}</div>
+            <div class="meta">Due: {{ t['due_date'] or '—' }}</div>
+          </div>
+          <form action="{{ url_for('delete', todo_id=t['id']) }}" method="post">
+            <button class="danger" title="Delete">✕</button>
+          </form>
+        </li>
+        {% else %}
+        <li class="empty">No todos yet — add your first one above.</li>
+        {% endfor %}
+      </ul>
+    </main>
+  </body>
+</html>
